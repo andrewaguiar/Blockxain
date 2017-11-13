@@ -1,4 +1,6 @@
 defmodule Blockxain.Block do
+  alias Blockxain.ProofOfWork
+
   defstruct [:index, :timestamp, :data, :previous_hash, :nonce, :difficult, :hash]
 
   @doc """
@@ -17,9 +19,9 @@ defmodule Blockxain.Block do
 
   defp create_block(index, data, previous_hash) do
     with timestamp <- :os.system_time(:millisecond),
-          consolidated_data <- consolidate_data(index, timestamp, previous_hash, data),
-          difficult <- generate_difficult(),
-          {nonce, hash} <- Blockxain.ProofOfWork.compute_hash_with_proof_of_work(consolidated_data, difficult) do
+         consolidated_data <- consolidate_data(index, timestamp, previous_hash, data),
+         difficult <- generate_difficult(),
+         {nonce, hash} <- ProofOfWork.compute_hash_with_proof_of_work(consolidated_data, difficult) do
 
       %Blockxain.Block{
         index: index,
