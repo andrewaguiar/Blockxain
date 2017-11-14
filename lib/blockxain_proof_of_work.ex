@@ -3,6 +3,15 @@ defmodule Blockxain.ProofOfWork do
   Implements a Proof of Work algorithm
   """
 
+  def valid?(data, nonce, hash, difficult) do
+    with proof_hash <- generate_hash(nonce, data),
+         {valid_given_difficut, _} <- validate_hash(proof_hash, difficult) do
+      valid_given_difficut && (proof_hash == hash)
+    else
+      _ -> false
+    end
+  end
+
   @doc """
   Given a data and a difficult (beginning of the hash), computes hashs with an increment
   till we get a hash starting with difficult, then returns the number of tries and the hash
@@ -11,7 +20,7 @@ defmodule Blockxain.ProofOfWork do
       iex> Blockxain.ProofOfWork.compute_hash_with_proof_of_work("Our data here", "ABC")
       {4181, "ABC44B5C8AF4ECC3E4B90F2B712C7B5FDF3A918FDE8B555EEAC38611D8AC7C5A"}
   """
-  def compute_hash_with_proof_of_work(data, difficult \\ "0") do
+  def compute_hash_with_proof_of_work(data, difficult) do
     compute_hash_with_proof_of_work_with_nonce(data, difficult, 0)
   end
 

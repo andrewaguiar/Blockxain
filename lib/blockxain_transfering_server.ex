@@ -8,12 +8,7 @@ defmodule Blockxain.TransferingServer do
   end
 
   def add(server, transfering) do
-    with {:ok, true} <- Blockxain.Transfering.valid?(transfering),
-         {:ok, true} <- {:ok, true} do # should check wallet_balance_valid?(transfering)
-      GenServer.cast(server, {:add, transfering})
-    else
-      _ -> {:error}
-    end
+    GenServer.cast(server, {:add, transfering})
   end
 
   def flush(server) do

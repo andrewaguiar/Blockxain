@@ -1,37 +1,37 @@
 defmodule Blockxain.MerkleTree do
   defstruct [:hash, :children]
 
-  defmodule Leaf do
-    defstruct [:hash]
-  end
-
-  defmodule Gallow do
-    defstruct [:hash, :children]
-  end
-
-  def build_merkle_tree(values) do
+  def create(values) do
     values
-    |> Enum.map(fn value -> %Leaf{hash: generate_hash(value)} end)
-    |> build_gallows
+    |> create_leaves
+    |> create_gallows
   end
 
-  defp build_gallows([%{hash: hash, children: children}]) do
+  defp create_leaves(values) do
+    values
+    |> Enum.map(fn value -> %{hash: generate_hash(value)} end)
+  end
+
+  defp create_gallows([%{hash: hash, children: children}]) do
     %Blockxain.MerkleTree{hash: hash, children: children}
   end
 
-  defp build_gallows(values) do
+  defp create_gallows(values) do
     values
     |> Enum.chunk_every(2)
     |> Enum.map(fn tuple -> concatenate(tuple) end)
-    |> build_gallows
+    |> create_gallows
   end
 
   defp concatenate([%{hash: hash_a}, %{hash: hash_b}] = tuple) do
-    %Gallow{hash: generate_hash(hash_a <> hash_b), children: tuple}
+    # H(A) | H(B)
+    %{hash: generate_hash(hash_a <> hash_b), children: tuple}
   end
 
   defp concatenate([%{hash: hash_a}] = tuple) do
-    %Gallow{hash: generate_hash(hash_a <> hash_a), children: tuple}
+    # in case of odd number of children, just replicate it
+    # H(A) | H(A)
+    %{hash: generate_hash(hash_a <> hash_a), children: tuple}
   end
 
   defp generate_hash(data) do

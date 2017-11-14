@@ -9,12 +9,7 @@ defmodule Blockxain.BlocksServer do
   end
 
   def add_block(server, transferings) do
-    IO.puts("adding a new block with #{length(transferings)} transferings")
     GenServer.cast(server, {:add_block, Blockxain.generate_data(transferings)})
-  end
-
-  def get(server) do
-    GenServer.call(server, {:get})
   end
 
   def info(server) do
@@ -27,10 +22,6 @@ defmodule Blockxain.BlocksServer do
 
   def handle_call({:info}, _from, blockchain) do
     {:reply, {:ok, %{blockchain_length: length(blockchain)}}, blockchain}
-  end
-
-  def handle_call({:get}, _from, blockchain) do
-    {:reply, blockchain, blockchain}
   end
 
   def handle_cast({:add_block, data}, blockchain) do

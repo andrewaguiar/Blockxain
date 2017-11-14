@@ -7,6 +7,7 @@ defmodule Blockxain.Mixfile do
       version: "0.1.0",
       elixir: "~> 1.5",
       start_permanent: Mix.env == :prod,
+      test_coverage: [tool: Coverex.Task],
       deps: deps()
     ]
   end
@@ -20,6 +21,7 @@ defmodule Blockxain.Mixfile do
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
-    [{:rsa_ex, "~> 0.1"}]
+    [{:rsa_ex, "~> 0.1"},
+     {:coverex, "~> 1.4.10", only: :test}]
   end
 end
