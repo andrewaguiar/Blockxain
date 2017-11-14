@@ -4,7 +4,7 @@ defmodule Blockxain.BlockTest do
   alias Blockxain.Block
 
   test "genesis block creation" do
-    %Blockxain.Block{
+    %Block{
       index: index,
       timestamp: timestamp,
       data: data,
