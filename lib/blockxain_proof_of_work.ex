@@ -26,7 +26,7 @@ defmodule Blockxain.ProofOfWork do
 
   defp compute_hash_with_proof_of_work_with_nonce(data, difficult, nonce) do
     with hash <- generate_hash(nonce, data),
-         {true, hash} <- validate_hash(hash, difficult) do
+         true <- validate_hash(hash, difficult) do
       {nonce, hash}
     else
       _ -> compute_hash_with_proof_of_work_with_nonce(data, difficult, nonce + 1)
@@ -34,7 +34,7 @@ defmodule Blockxain.ProofOfWork do
   end
 
   defp validate_hash(hash, difficult) do
-    {String.starts_with?(hash, difficult), hash}
+    String.starts_with?(hash, difficult)
   end
 
   defp generate_hash(nonce, data) do

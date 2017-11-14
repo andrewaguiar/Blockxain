@@ -113,4 +113,23 @@ tries to find a hash that matches our challenge
 :crypto.hash(:sha256, data <> "15") |> Base.encode16 # => "28D1C08992D346B301661FA7067BF767E1E9A2F83652C792DE44760F55E54A56"
 ```
 
-In our case we were lucky, after only 15 rounds we found a winning hash.
+In our case we were lucky, after only 15 rounds we found a winning hash. A more complete algorithm would be something like:
+
+```
+defmodule ProofOfWork do
+  def compute_hash_with_proof_of_work(data, difficult) do
+    compute_hash_with_proof_of_work_with_nonce(data, difficult, 0)
+  end
+
+  defp compute_hash_with_proof_of_work_with_nonce(data, difficult, nonce) do
+    with hash <- (:crypto.hash(:sha256, "#{data}#{nonce}") |> Base.encode16),
+         true <- String.starts_with?(hash, difficult) do
+      {nonce, hash}
+    else
+      _ -> compute_hash_with_proof_of_work_with_nonce(data, difficult, nonce + 1)
+    end
+  end
+end
+```
+
+
