@@ -22,6 +22,7 @@ defmodule Blockxain.Mixfile do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [{:rsa_ex, "~> 0.1"},
-     {:coverex, "~> 1.4.10", only: :test}]
+     {:coverex, "~> 1.4.10", only: :test},
+     {:credo, "~> 0.8", only: [:dev, :test], runtime: false}]
   end
 end

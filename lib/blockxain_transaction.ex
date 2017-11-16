@@ -1,18 +1,22 @@
-defmodule Blockxain.Transfering do
+defmodule Blockxain.Transaction do
   require RsaEx
+
+  alias Blockxain.Crypto
 
   defstruct [:hash, :from, :to, :amount, :timestamp, :signature]
 
-  def valid?(%Blockxain.Transfering{from: from, to: to, amount: amount, timestamp: timestamp, signature: signature}) do
-    generate_data(from, to, amount, timestamp) |> RsaEx.verify(signature, from)
+  def valid?(%Blockxain.Transaction{from: from, to: to, amount: amount, timestamp: timestamp, signature: signature}) do
+    with data <- generate_data(from, to, amount, timestamp) do
+      RsaEx.verify(data, signature, from)
+    end
   end
 
-  def transfer(%Blockxain.Wallet{public_key: public_key, private_key: private_key}, dest_public_key, amount) do
+  def create(%Blockxain.Wallet{public_key: public_key, private_key: private_key}, dest_public_key, amount) do
     with timestamp <- :os.system_time(:millisecond),
          data <- generate_data(public_key, dest_public_key, amount, timestamp),
          {:ok, signature} <- RsaEx.sign(data, private_key) do
 
-      %Blockxain.Transfering{
+      %Blockxain.Transaction{
         hash: generate_hash(data, signature),
         from: public_key,
         to: dest_public_key,
@@ -24,11 +28,10 @@ defmodule Blockxain.Transfering do
   end
 
   defp generate_hash(data, signature) do
-    :crypto.hash(:sha256, "#{data}:#{signature}") |> Base.encode16
+    Crypto.hash("#{data}:#{signature}")
   end
 
   defp generate_data(from, to, amount, timestamp) do
     "#{from}:#{to}:#{amount}:#{timestamp}"
   end
 end
-

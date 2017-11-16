@@ -1,4 +1,6 @@
 defmodule Blockxain.MerkleTree do
+  alias Blockxain.Crypto
+
   defstruct [:hash, :children]
 
   def create(values) do
@@ -35,6 +37,6 @@ defmodule Blockxain.MerkleTree do
   end
 
   defp generate_hash(data) do
-    :crypto.hash(:sha256, "#{data}") |> Base.encode16
+    Crypto.hash(data)
   end
 end

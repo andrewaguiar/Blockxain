@@ -1,14 +1,13 @@
 defmodule Blockxain.ProofOfWork do
+  alias Blockxain.Crypto
+
   @moduledoc """
   Implements a Proof of Work algorithm
   """
 
   def valid?(data, nonce, hash, difficult) do
-    with proof_hash <- generate_hash(nonce, data),
-         {valid_given_difficut, _} <- validate_hash(proof_hash, difficult) do
-      valid_given_difficut && (proof_hash == hash)
-    else
-      _ -> false
+    with proof_hash <- generate_hash(nonce, data) do
+      validate_hash(proof_hash, difficult) && (proof_hash == hash)
     end
   end
 
@@ -38,6 +37,6 @@ defmodule Blockxain.ProofOfWork do
   end
 
   defp generate_hash(nonce, data) do
-    :crypto.hash(:sha256, "#{nonce}-#{data}") |> Base.encode16
+    Crypto.hash("#{nonce}-#{data}")
   end
 end

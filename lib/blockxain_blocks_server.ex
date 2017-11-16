@@ -1,15 +1,17 @@
 defmodule Blockxain.BlocksServer do
+  require Logger
+
   use GenServer
 
   @doc """
   Starts the registry.
   """
-  def start_link() do
+  def start_link do
     GenServer.start_link(__MODULE__, :ok, [])
   end
 
-  def add_block(server, transferings) do
-    GenServer.cast(server, {:add_block, Blockxain.generate_data(transferings)})
+  def add_block(server, transactions) do
+    IO.puts GenServer.cast(server, {:add_block, Blockxain.generate_data(transactions)})
   end
 
   def info(server) do
@@ -25,6 +27,11 @@ defmodule Blockxain.BlocksServer do
   end
 
   def handle_cast({:add_block, data}, blockchain) do
-    {:noreply, Blockxain.add(blockchain, data)}
+    with new_blockchain <- Blockxain.add(blockchain, data),
+         [recently_added_block | _] <- new_blockchain,
+         _ <- Logger.info("[BlocksServer] adding a block in blockchain #{recently_added_block.hash}") do
+
+      {:noreply, new_blockchain}
+    end
   end
 end

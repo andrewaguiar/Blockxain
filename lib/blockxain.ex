@@ -20,10 +20,10 @@ defmodule Blockxain do
     end
   end
 
-  def generate_data(transferings) do
-    with hashes <- Enum.map(transferings, fn transfering -> transfering.hash end),
+  def generate_data(transactions) do
+    with hashes <- Enum.map(transactions, fn transaction -> transaction.hash end),
          %MerkleTree{hash: merkle_tree_root_hash} <- MerkleTree.create(hashes) do
-      "#{merkle_tree_root_hash}:#{Enum.join(hashes, ",")}"
+      "#{merkle_tree_root_hash}:#{Enum.join(hashes, ";")}"
     end
   end
 end

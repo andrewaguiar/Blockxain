@@ -18,8 +18,9 @@ defmodule Blockxain.Block do
   end
 
   def valid?(block) do
-    consolidate_data(block.index, block.timestamp, block.previous_hash, block.data)
-    |> ProofOfWork.valid?(block.nonce, block.hash, block.difficult)
+    with consolidated_data <- consolidate_data(block.index, block.timestamp, block.previous_hash, block.data) do
+      ProofOfWork.valid?(consolidated_data, block.nonce, block.hash, block.difficult)
+    end
   end
 
   defp create_block(index, data, previous_hash) do
@@ -41,7 +42,10 @@ defmodule Blockxain.Block do
   end
 
   defp generate_difficult do
-    :rand.uniform(99999999999) |> Integer.to_string(16) |> String.slice(1..3)
+    99_999_999_999
+    |> :rand.uniform
+    |> Integer.to_string(16)
+    |> String.slice(1..4)
   end
 
   defp consolidate_data(index, timestamp, previous_hash, data) do
