@@ -11,7 +11,7 @@ defmodule Blockxain.BlocksServer do
   end
 
   def add_block(server, transactions) do
-    IO.puts GenServer.cast(server, {:add_block, Blockxain.generate_data(transactions)})
+    GenServer.cast(server, {:add_block, Blockxain.generate_data(transactions)})
   end
 
   def info(server) do

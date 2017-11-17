@@ -18,7 +18,6 @@ defmodule Blockxain.TransactionProcessor do
   defp process(_, []), do: nil
 
   defp process(server_pid, transactions) when length(transactions) > 1 do
-    IO.puts "process"
     BlocksServer.add_block(server_pid, transactions)
   end
 end
