@@ -1,8 +1,14 @@
 defmodule Blockxain.WalletsServer do
+  @moduledoc """
+  The wallets server, stores the state of wallets ledger, transactions and transactions
+  by wallets.
+  """
   use GenServer
 
   alias Blockxain.Crypto
   alias Blockxain.WalletsTransactionIOLedger
+
+  ## Client API
 
   def start_link do
     GenServer.start_link(__MODULE__, :ok, [])
@@ -28,6 +34,8 @@ defmodule Blockxain.WalletsServer do
     GenServer.call(server, {:info})
   end
 
+  ## Callbacks
+
   def init(:ok) do
     {:ok, %{
       wallets_ledger: %WalletsTransactionIOLedger{ledgers: %{}},
@@ -36,6 +44,28 @@ defmodule Blockxain.WalletsServer do
   end
 
   def handle_cast({:add_transaction, transaction}, state) do
+    {:noreply, add_transaction_to_state(state, transaction)}
+  end
+
+  def handle_call({:wallet_balance, wallet_public_key}, _from, state) do
+    {:reply, {:ok, fetch_wallet_balance(state, wallet_public_key)}, state}
+  end
+
+  def handle_call({:wallet_transactions, wallet_public_key}, _from, state) do
+    {:reply, {:ok, fetch_wallet_transactions(state, wallet_public_key)}, state}
+  end
+
+  def handle_call({:transactions}, _from, state) do
+    {:reply, {:ok, state.transactions}, state}
+  end
+
+  def handle_call({:info}, _from, state) do
+    {:reply, {:ok, fetch_info(state)}, state}
+  end
+
+  ## Functions
+
+  defp add_transaction_to_state(state, transaction) do
     with wallet_from_hash <- generate_wallet_hash(transaction.from),
          wallet_to_hash <- generate_wallet_hash(transaction.to),
          # Initializes wallet register in ledger when it does not exist
@@ -54,36 +84,28 @@ defmodule Blockxain.WalletsServer do
          new_wallet_transactions <- add_transaction_to_wallet_transactions(state.wallet_transactions,
                                                                            wallet_from_hash,
                                                                            wallet_to_hash,
-                                                                           transaction),
-         # creates the new state
-         new_state <- %{wallets_ledger: new_wallets_ledger,
-                        transactions: new_transactions,
-                        wallet_transactions: new_wallet_transactions} do
-
-      {:noreply, new_state}
+                                                                           transaction) do
+      # creates the new state
+      %{wallets_ledger: new_wallets_ledger,
+        transactions: new_transactions,
+        wallet_transactions: new_wallet_transactions}
     end
   end
 
-  def handle_call({:wallet_balance, wallet_public_key}, _from, state) do
-    with wallet_hash <- generate_wallet_hash(wallet_public_key),
-         balance <- WalletsTransactionIOLedger.wallet_balance(state.wallets_ledger, wallet_hash) do
-      {:reply, {:ok, balance}, state}
+  defp fetch_wallet_balance(state, wallet_public_key) do
+    with wallet_hash <- generate_wallet_hash(wallet_public_key) do
+      WalletsTransactionIOLedger.wallet_balance(state.wallets_ledger, wallet_hash)
     end
   end
 
-  def handle_call({:wallet_transactions, wallet_public_key}, _from, state) do
-    with wallet_hash <- generate_wallet_hash(wallet_public_key),
-         transactions <- Map.get(state.wallet_transactions, wallet_hash) do
-      {:reply, {:ok, transactions}, state}
+  def fetch_wallet_transactions(state, wallet_public_key) do
+    with wallet_hash <- generate_wallet_hash(wallet_public_key) do
+      Map.get(state.wallet_transactions, wallet_hash)
     end
   end
 
-  def handle_call({:transactions}, _from, state) do
-    {:reply, {:ok, state.transactions}, state}
-  end
-
-  def handle_call({:info}, _from, state) do
-    {:reply, {:ok, %{wallets_length: length(Map.keys(state.wallets_ledger.ledgers))}}, state}
+  def fetch_info(state) do
+    %{wallets_length: (state.wallets_ledger.ledgers |> Map.keys |> length)}
   end
 
   defp add_transaction_to_wallet_transactions(wallet_transactions, wallet_from_hash, wallet_to_hash,  %Blockxain.Transaction{hash: tx_hash}) do

@@ -1,4 +1,7 @@
 defmodule Blockxain.Block do
+  @moduledoc """
+  defines functions and a Block struct to deal with blocks of blockchain
+  """
   alias Blockxain.ProofOfWork
 
   defstruct [:index, :timestamp, :data, :previous_hash, :nonce, :difficult, :hash]

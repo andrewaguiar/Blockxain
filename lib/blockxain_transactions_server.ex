@@ -1,4 +1,8 @@
 defmodule Blockxain.TransactionsServer do
+  @moduledoc """
+  Stores the list of received transactions and provides a flush for each
+  10 transactions.
+  """
   use GenServer
 
   @max_pool_size 10

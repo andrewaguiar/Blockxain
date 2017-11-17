@@ -1,4 +1,8 @@
 defmodule Blockxain.MerkleTree do
+  @moduledoc """
+  Implements the merkle tree algorithm https://en.wikipedia.org/wiki/Merkle_tree
+  """
+
   alias Blockxain.Crypto
 
   defstruct [:hash, :children]

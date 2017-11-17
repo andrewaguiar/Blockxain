@@ -1,4 +1,8 @@
 defmodule Blockxain.Transaction do
+  @moduledoc """
+  Defines functions and a struct to deal with the transaction process, transaction is
+  an abstraction of transfering values from a wallet to another
+  """
   require RsaEx
 
   alias Blockxain.Crypto

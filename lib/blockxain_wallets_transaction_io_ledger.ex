@@ -1,8 +1,20 @@
 defmodule Blockxain.WalletsTransactionIOLedger do
+  @moduledoc """
+  Provides operation and struct to deal with transaction inputs and outputs also
+  all the process of transform a transaction in inputs and outputs registered to
+  the specific wallets.
+  """
   alias Blockxain.TransactionIOLedger
+
+  @type t :: %Blockxain.WalletsTransactionIOLedger{ledgers: %{String.t => []}}
 
   defstruct [:ledgers]
 
+  @doc """
+  Process the transaction and creates all inputs and outputs required to both wallets
+  (sender wallet and receive wallet).
+  """
+  @spec yield_transaction(t, String.t, String.t, String.t, integer) :: t | {:error, :not_enough_balance}
   def yield_transaction(%Blockxain.WalletsTransactionIOLedger{ledgers: ledgers}, transaction_hash, wallet_from_hash, wallet_to_hash, amount) do
     with wallet_from <- Map.get(ledgers, wallet_from_hash) do
       if TransactionIOLedger.sum_ios(wallet_from) >= amount do
@@ -17,10 +29,18 @@ defmodule Blockxain.WalletsTransactionIOLedger do
     end
   end
 
+  @doc """
+  Returns the balance of given wallet.
+  """
+  @spec wallet_balance(t, String.t) :: integer
   def wallet_balance(%Blockxain.WalletsTransactionIOLedger{ledgers: ledgers}, wallet_hash) do
     TransactionIOLedger.sum_ios(Map.get(ledgers, wallet_hash))
   end
 
+  @doc """
+  Create the very first transaction containing one input of 1000 to a given wallet.
+  """
+  @spec yield_genesis_transaction(t, String.t) :: t
   def yield_genesis_transaction(%Blockxain.WalletsTransactionIOLedger{ledgers: ledgers}, wallet_hash) do
     %Blockxain.WalletsTransactionIOLedger{
       ledgers: Map.put_new(ledgers, wallet_hash, [%TransactionIOLedger.InOut{amount: 1000, origin_tx_hash: [], tx_hash: "0"}])
@@ -65,7 +85,7 @@ defmodule Blockxain.WalletsTransactionIOLedger do
     end
   end
 
-  def mount_inputs(ios, transaction_hash, amount) do
+  defp mount_inputs(ios, transaction_hash, amount) do
     [%TransactionIOLedger.InOut{tx_hash: transaction_hash,
                                amount: amount,
                                origin_tx_hash: Enum.map(ios, &(&1.tx_hash))}]
